@@ -125,6 +125,12 @@ function ai_checkwinner() {
   }
   return false;
 }
+
+function isBetterMove(newMove, currentBest) {
+  const priority = [4, 0, 2, 6, 8, 1, 3, 5, 7]; // Center > corners > sides
+  return priority.indexOf(newMove) < priority.indexOf(currentBest);
+}
+
 function check_immediatewins(b) {
     // Check if AI can win immediately
     for (let i = 0; i < simulated_options.length; i++) {
@@ -156,6 +162,7 @@ function check_immediatewins(b) {
 
   return false;
 }
+
 /*
 create arr for the 4 possible moves
 O moves +5 
@@ -167,7 +174,7 @@ start with the first move + 10 if its move -5 if x moves -10 if x wins
 2nd index in arr results in 0    +10 -10 =0 looks for the one with the least scpore
 */
 let temp = 0;
-
+//1,0,-1(ai try to get the highest amount)(human is lowest)
 function best_move(depth, isMaximising) {
   let bestMove = -1;
   let result = ai_checkwinner(); //
@@ -182,24 +189,29 @@ function best_move(depth, isMaximising) {
             }
         }
     }*/
+   //check if at least one row filled
   if (result !== false) {
     //means it is a win or loss
     if (result === "X") {
       //console.log(`threat detected`);
-      return -100 + depth + 1;
+      return -100 + depth;//ai lost thus -
     } else if (result === "O") {
-      return 40 - depth - 1;
+      return 100 - depth;//ai won thus +
     }
     return 0; //if it finds the optimal move
   }
-  if (isMaximising) {
+
+
+
+
+  if (isMaximising) {//ai pushing better score
     let bestScore = -Infinity;
     for (let i = 0; i < simulated_options.length; i++) {
       if (simulated_options[i] == "") {
         simulated_options[i] = "O";
-        let score = best_move(depth + 1, false); //no longer maximising
+        let score = best_move(depth + 1, false); //no longer maximising     
         simulated_options[i] = "";
-        if (bestScore < score) {
+        if (score > bestScore || (score === bestScore && isBetterMove(i, bestMove))) {
           bestMove = i;
           bestScore = score;
         }
@@ -210,6 +222,8 @@ function best_move(depth, isMaximising) {
     }
     return bestScore;
   }
+
+
   if (!isMaximising) {
     let bestScore = Infinity;
     for (let i = 0; i < simulated_options.length; i++) {
